@@ -76,45 +76,16 @@ def admin():
 	if request.method == 'POST' and 'jwt_token' in request.form:
 		jwt_token = request.form['jwt_token']
 		obj = decode_user(jwt_token)
-		return jsonify({'user': obj})
-	return Response(status=401)
-
-
-@app.route('/register', methods =['GET', 'POST'])
-def register():
-	msg = ''
-	if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form and 'address' in request.form and 'city' in request.form and 'country' in request.form and 'postalcode' in request.form and 'organisation' in request.form:
-		username = request.form['username']
-		password = request.form['password']
-		email = request.form['email']
-		organisation = request.form['organisation']
-		address = request.form['address']
-		city = request.form['city']
-		state = request.form['state']
-		country = request.form['country']
-		postalcode = request.form['postalcode']
-		# cursor = cur.cursor(MySQLdb.cursors.DictCursor)
-		cur.execute('SELECT * FROM accounts WHERE username = % s', (username, ))
+		this_id = obj['id']
+		cur.execute('SELECT * FROM accounts WHERE id = %s', (this_id))
 		account = cur.fetchone()
-		if account:
-			msg = 'Account already exists !'
-		elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-			msg = 'Invalid email address !'
-		elif not re.match(r'[A-Za-z0-9]+', username):
-			msg = 'name must contain only characters and numbers !'
-		else:
-			cur.execute('INSERT INTO accounts VALUES (NULL, % s, % s, % s, % s, % s, % s, % s, % s, % s)', 
-	       (username, password, email, organisation, address, city, state, country, postalcode, ))
-			cur.commit()
-			msg = 'You have successfully registered !'
-	elif request.method == 'POST':
-		msg = 'Please fill out the form !'
-	return render_template('register.html', msg = msg)
+		return jsonify({'user': account})
+	return Response(status=401)
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
+        
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
