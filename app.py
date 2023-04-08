@@ -44,31 +44,37 @@ def decode_user(token: str):
 @app.route('/')
 @app.route('/login', methods =['GET', 'POST'])
 def login():
-	if request.method == 'GET':
-		cur.execute('SELECT * FROM accounts')
-		accounts = cur.fetchall()
-		accountsList = []
-		for row in accounts:
-			accountsList.append(json.dumps(row))
-		return accountsList
-	if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-		username = request.form['username']
-		password = request.form['password']
-		# cursor = cur.cursor(MySQLdb.cursors.DictCursor)
-		cur.execute('SELECT * FROM accounts WHERE username = % s AND password = % s', (username, password))
-		account = cur.fetchone()
-		this_id = account[0]
-		jwt_token = generate_jwt_token({"id": this_id})
-
-		if account:
-			return jsonify({"jwt_token": jwt_token})
-	return make_response(
-		jsonify({
-			"message": "User already exists", 
-			"error": "Unauthorized", 
-			"data": None
-		}), 401
+  if request.method == 'GET':
+    cur.execute('SELECT * FROM accounts')
+    accounts = cur.fetchall()
+    accountsList = []
+    for row in accounts:
+      accountsList.append(json.dumps(row))
+    return accountsList
+  if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+    username = request.form['username']
+    password = request.form['password']
+    cur.execute('SELECT * FROM accounts WHERE username = % s AND password = % s', (username, password))
+    account = cur.fetchone()
+    if account == None:
+      return make_response(
+    jsonify({
+      "message": "User does not exists", 
+      "error": "Unauthorized", 
+      "data": None
+    }), 401
     )
+    this_id = account[0]
+    jwt_token = generate_jwt_token({"id": this_id})
+  if account:
+    return jsonify({"jwt_token": jwt_token})
+  return make_response(
+  jsonify({
+    "message": "User does not exists", 
+    "error": "Unauthorized", 
+    "data": None
+  }), 401
+  )
 
 @app.route('/admin', methods =['POST'])
 def admin():
@@ -122,6 +128,14 @@ def upload_file():
 					"error": "Bad Request", 
 					"data": None
 				}), 400
+            )
+        if not allowed_file(file.filename):
+          return make_response(
+            jsonify({
+              "message": "This File Type is not allowed", 
+              "error": "Not", 
+              "data": file.filename
+            }), 406
             )
         if file and allowed_file(file.filename):
           filename = secure_filename(file.filename)

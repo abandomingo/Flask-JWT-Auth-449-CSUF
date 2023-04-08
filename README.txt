@@ -11,6 +11,8 @@ pip install Flask
 pip install PyJWT
 pip install python-dotenv
 pip install Werkzeug
+ or 
+pip install -r requirements.txt
 
 In venv, to start server
 
