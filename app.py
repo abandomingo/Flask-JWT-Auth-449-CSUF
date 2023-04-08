@@ -1,5 +1,5 @@
 # Store this code in 'app.py' file
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response, flash, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response, flash, url_for, make_response
 # from  flask_mysqldb import MySQL
 import pymysql
 from flask_cors import CORS
@@ -69,7 +69,13 @@ def login():
 
 		if account:
 			return jsonify({"jwt_token": jwt_token})
-	return Response(status=401)
+	return make_response(
+		jsonify({
+			"message": "User already exists", 
+			"error": "Unauthorized", 
+			"data": None
+		}), 401
+    )
 
 @app.route('/admin', methods =['POST'])
 def admin():
@@ -80,7 +86,13 @@ def admin():
 		cur.execute('SELECT * FROM accounts WHERE id = %s', (this_id))
 		account = cur.fetchone()
 		return jsonify({'user': account})
-	return Response(status=401)
+	return make_response(
+		jsonify({
+			"message": "User is not recognized as admin", 
+			"error": "Unauthorized", 
+			"data": None
+		}), 401
+    )
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -91,19 +103,35 @@ def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
-            return Response(status=406)
+            return make_response(
+			    jsonify({
+				    "message": "File doesn't exist", 
+					"error": "Not Acceptable", 
+					"data": None
+				}), 406
+            )
         file = request.files['file']
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
-            flash('No selected file')
-            return Response(status=400)
+            return make_response(
+			    jsonify({
+				    "message": "No file was selected", 
+					"error": "Bad Request", 
+					"data": None
+				}), 400
+            )
         if file and allowed_file(file.filename):
           filename = secure_filename(file.filename)
           file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
           return 'Success'
-    return Response(status=401)
+    return make_response(
+		jsonify({
+			"message": "Unauthorized user cannot upload file", 
+			"error": "Unauthorized", 
+			"data": None
+		}), 401
+    )
 
 if __name__ == "__main__":
 	app.run(host ="localhost", port = int("5000"))
