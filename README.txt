@@ -1,4 +1,4 @@
-Aban Domingo and Brandon Winklerc , 4/5/23, CSUF 449 Backend Engineering
+Aban Domingo and Brandon Winkler , 4/5/23, CSUF 449 Backend Engineering
 
 To start this file, make sure you are in this projects venv
 
