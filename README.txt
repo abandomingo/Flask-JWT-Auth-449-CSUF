@@ -4,6 +4,8 @@ To start this file, make sure you are in this projects venv
 
 . venv/bin/activate
 
+Create an .env file (look at sample-env for more info)
+
 Make sure libraries are installed in venv
 
 pip install pymysql

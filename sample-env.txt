@@ -1,0 +1,9 @@
+Create a file similar to this called .env
+
+JWT_SECRET_KEY="insert secret key here"
+
+MYSQL_PASSWORD="insert password here"
+
+MYSQL_DB='insert database here'
+
+STORAGE_PATH = 'insert PATH to store files here'
