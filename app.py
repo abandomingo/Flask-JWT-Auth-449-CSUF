@@ -1,30 +1,27 @@
-# Store this code in 'app.py' file
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Response, flash, url_for, make_response
-# from  flask_mysqldb import MySQL
-import pymysql
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response
 from flask_cors import CORS
 import jwt
-# import MySQLdb.cursors
-import re
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
-
+import pymysql
 load_dotenv()
 
 import os
 import json
 
 
-UPLOAD_FOLDER = os.getenv('STORAGE_PATH_MAC')
+
+UPLOAD_FOLDER = os.getenv('STORAGE_PATH')
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # CORS(app)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 app.secret_key = os.getenv('JWT_SECRET_KEY')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1000 * 1000 #8 megabytes max
 
 conn = pymysql.connect(
         host='127.0.0.1',
@@ -41,10 +38,6 @@ def generate_jwt_token(content):
     return token
 
 def decode_user(token: str):
-    """
-    :param token: jwt token
-    :return:
-    """
     decoded_data = jwt.decode(token, app.secret_key, algorithms=["HS256"])
     return decoded_data
 
@@ -79,26 +72,35 @@ def login():
 
 @app.route('/admin', methods =['POST'])
 def admin():
-	if request.method == 'POST' and 'jwt_token' in request.form:
-		jwt_token = request.form['jwt_token']
-		obj = decode_user(jwt_token)
-		this_id = obj['id']
-		cur.execute('SELECT * FROM accounts WHERE id = %s', (this_id))
-		account = cur.fetchone()
-		return jsonify({'user': account})
-	return make_response(
-		jsonify({
-			"message": "User is not recognized as admin", 
-			"error": "Unauthorized", 
-			"data": None
-		}), 401
-    )
+    if request.method == 'POST' and 'jwt_token' in request.form:
+        jwt_token = request.form['jwt_token']
+        try:
+            obj = decode_user(jwt_token)
+        except jwt.exceptions.DecodeError:
+            return make_response(
+                jsonify({
+                    "message": "Invalid token",
+                    "error": "Unauthorized",
+                    "data": None
+                }), 401
+            )
+        this_id = obj['id']
+        cur.execute('SELECT * FROM accounts WHERE id = %s', (this_id))
+        account = cur.fetchone()
+        return jsonify({'user': account})
+    return make_response(
+        jsonify({
+            "message": "User is not recognized as admin", 
+            "error": "Unauthorized", 
+            "data": None
+        }), 401
+        )
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
         
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
