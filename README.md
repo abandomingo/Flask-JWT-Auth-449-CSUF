@@ -10,34 +10,34 @@ pip install PyJWT<br>
 pip install python-dotenv<br>
 pip install Werkzeug<br>
  or <br>
-pip install -r requirements.txt<br>
+***pip install -r requirements.txt<br>***
 
 Create a virtual env<br>
 
-virtualenv venv<br>
+***virtualenv venv<br>***
 
 Create an .env file (look at sample-env for more info)<br>
 and set file with your own info<br>
 
 MacOS:<br>
-touch .env<br>
+***touch .env<br>***
 
 Windows: <br>
-type nul > .env<br>
+***type nul > .env<br>***
 
 
 To start this file, make sure you are in this projects venv<br>
 
 MacOS:<br>
-. venv/bin/activate<br>
+***. venv/bin/activate<br>***
 
 Windows:<br>
-venv/Scripts/activate <br>
+***venv/Scripts/activate <br>***
 
 
 In venv, to start server<br>
 
-flask run<br>
+***flask run<br>***
 
 Here are some examples in post man<br>
 
