@@ -20,3 +20,6 @@ In venv, to start server
 
 flask run
 
+
+![Alt text](example.png?raw=true "Example 1")
+![Alt text](example2.png?raw=true "Example 2")
